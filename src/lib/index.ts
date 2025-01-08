@@ -1,3 +1,3 @@
 // Reexport your entry components here
-export * from './Z.svelte';
-export * from './Query.svelte';
+export * from './Z.svelte.ts';
+export * from './Query.svelte.ts';

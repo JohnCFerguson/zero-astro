@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'vitest';
-import {mergeIterables, wrapIterable} from './iterables.js';
+import {mergeIterables, wrapIterable} from './iterables.ts';
 import fc from 'fast-check';
 
 function* range(start = 0, end = Infinity, step = 1) {

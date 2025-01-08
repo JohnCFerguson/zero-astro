@@ -1,5 +1,5 @@
-import {reverseString} from './reverse-string.js';
-import {h64} from './xxhash.js';
+import {reverseString} from './reverse-string.ts';
+import {h64} from './xxhash.ts';
 
 /**
  * xxhash only computes 64-bit values. Run it on the forward and reverse string

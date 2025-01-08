@@ -7,11 +7,11 @@ import type {
 	TableSchema,
 	TypedView
 } from '@rocicorp/zero';
-import { deepClone } from './shared/deep-clone';
-import type { Immutable } from './shared/immutable';
+import { deepClone } from './shared/deep-clone.ts';
+import type { Immutable } from './shared/immutable.ts';
 import type { AdvancedQuery } from '@rocicorp/zero/advanced';
 import { getContext } from 'svelte';
-import type { Schema, Z } from './Z.svelte.js';
+import type { Schema, Z } from './Z.svelte.ts';
 
 export type ResultType = 'unknown' | 'complete';
 
