@@ -1,4 +1,4 @@
-type Primitive = undefined | null | boolean | string | number | symbol | bigint;
+export type Primitive = undefined | null | boolean | string | number | symbol | bigint;
 
 /**
  * Create a deeply immutable type from a type that may contain mutable types.
@@ -6,8 +6,8 @@ type Primitive = undefined | null | boolean | string | number | symbol | bigint;
 export type Immutable<T> = T extends Primitive
   ? T
   : T extends Array<infer U>
-  ? ImmutableArray<U>
-  : ImmutableObject<T>;
+  ? ReadonlyArray<Immutable<U>>
+  : { readonly [K in keyof T]: Immutable<T[K]> };
 // This does not deal with Maps or Sets (or Date or RegExp or ...).
 
 export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;

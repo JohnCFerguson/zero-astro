@@ -1,6 +1,10 @@
 import {hasOwn} from './has-own.ts';
 import type {JSONValue, ReadonlyJSONValue} from './json.ts';
 
+export function deepClone<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value));
+}
+
 export function deepClone(value: ReadonlyJSONValue): JSONValue {
   const seen: Array<ReadonlyJSONValue> = [];
   return internalDeepClone(value, seen);

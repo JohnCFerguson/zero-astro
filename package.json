@@ -12,16 +12,13 @@
     "@rocicorp/zero": "^0.10.2024122404"
   },
   "devDependencies": {
-    "@astrojs/svelte": "^7.0.3",
     "astro": "^5.1.3",
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-astro": "^1.3.1",
-    "eslint-plugin-svelte": "^2.46.1",
+    "nanostores": "^0.11.3",
     "prettier": "^3.4.2",
     "prettier-plugin-astro": "^0.14.1",
-    "prettier-plugin-svelte": "^3.3.2",
-    "svelte": "^5.16.6",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.19.1"
   }
