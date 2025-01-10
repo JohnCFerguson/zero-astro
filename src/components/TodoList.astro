@@ -1,48 +1,26 @@
 ---
-import type { Todo } from "../types/types";
+import { Query } from '../lib/query.astro';
+import { mutations } from '../lib/mutations';
+import { z } from '../lib/db';
 
-const todos = (await zero.query((tx) => tx.scan('todos').toArray())) as Todo[];
+const todoQuery = new Query(z.query.todo);
+const { data: todos } = todoQuery.current;
 ---
 
-<form id="todo-form"></form>
-<input type="text" name="title" required />
-<button type="submit">Add Todo</button>
-
-<ul>
-	{
-		todos.map((todo) => (
-			<li class:list={['todo', { completed: todo.completed }]} data-id={todo.id}>
-				<input type="checkbox" checked={todo.completed} class="toggle" />
-				<span>{todo.title}</span>
-				<button class="delete">×</button>
-			</li>
-		))
-	}
-</ul>
+<div>
+  <h2>Todos</h2>
+  <ul>
+    {todos.map((todo) => (
+      <li>
+        {todo.title}
+        <button onclick={`window.deleteTodo('${todo.id}')`}>Delete</button>
+      </li>
+    ))}
+  </ul>
+</div>
 
 <script>
-	const form = document.querySelector('#todo-form');
-	const zero = window.zeroClient;
-
-	form?.addEventListener('submit', async (e) => {
-		e.preventDefault();
-		const formData = new FormData(form as HTMLFormElement);
-		const title = formData.get('title') as string;
-		await zero.mutate.createTodo(title);
-		(form as HTMLFormElement).reset();
-	});
-
-	document.querySelectorAll('.toggle').forEach((toggle) => {
-		toggle.addEventListener('change', async (e) => {
-			const id = (e.target as HTMLElement).closest('li')?.dataset.id;
-			if (id) await zero.mutate.toggleTodo(id);
-		});
-	});
-
-	document.querySelectorAll('.delete').forEach((button) => {
-		button.addEventListener('click', async (e) => {
-			const id = (e.target as HTMLElement).closest('li')?.dataset.id;
-			if (id) await zero.mutate.deleteTodo(id);
-		});
-	});
+  window.deleteTodo = async (id) => {
+    await mutations.deleteTodo(id);
+  };
 </script>

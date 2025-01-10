@@ -26,7 +26,7 @@ export type QueryResult<TReturn extends QueryType> = {
 
 export class Query<TSchema extends TableSchema, TReturn extends QueryType> {
     #view: TypedView<Smash<TReturn>> | undefined;
-    #data: Smash<TReturn>;
+    #data: Smash<TReturn> | undefined;
     #details: QueryResultDetails;
 
     constructor(query: QueryDef<TSchema, TReturn>) {
@@ -36,11 +36,11 @@ export class Query<TSchema extends TableSchema, TReturn extends QueryType> {
         this.#initialize(query);
     }
 
-    private async #initialize(query: QueryDef<TSchema, TReturn>) {
+    async #initialize(query: QueryDef<TSchema, TReturn>) {
         this.#view = query.materialize();
         this.#view.addListener((snap, resultType) => {
             const data = snap === undefined ? 
-                snap : 
+                undefined : 
                 (deepClone(snap as ReadonlyJSONValue) as Smash<TReturn>);
             this.#data = data;
             this.#details = { type: resultType };
@@ -48,8 +48,9 @@ export class Query<TSchema extends TableSchema, TReturn extends QueryType> {
     }
 
     get current(): QueryResult<TReturn> {
+        const defaultData = this.#data ?? ([] as unknown as Smash<TReturn>);
         return {
-            data: this.#data,
+            data: defaultData,
             details: this.#details
         };
     }

@@ -13,7 +13,7 @@ const z = new Z<Schema>({
 });
 
 // Get initial todos server-side
-const todos: Todo[] = new Query(z.current.query.todo)
+const todos = new Query(z.current.query.todo)
 
 // Define actions
 export const actions = {
@@ -58,7 +58,7 @@ export const actions = {
   </form>
 
   <ul>
-    {todos.map((todo: Todo) => (
+    {todos.map((todo as Todo) => (
       <li>
         <form method="POST" action={actions.toggleTodo} style="display: inline">
           <input type="hidden" name="id" value={todo.id} />

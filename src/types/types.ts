@@ -61,11 +61,3 @@ export type Immutable<T> = T extends Primitive
   : { readonly [K in keyof T]: Immutable<T[K]> }
 
 export type Expand<T> = T extends infer O ? {[K in keyof O]: O[K]} : never
-
-export type ResultType = 'unknown' | 'complete';
-
-export type QueryResultDetails = {
-    type: ResultType;
-};
-
-export type QueryResult<TReturn extends QueryType> = [Smash<TReturn>, QueryResultDetails];

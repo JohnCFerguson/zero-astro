@@ -10,7 +10,7 @@ export class Z<TSchema extends Schema> {
   private static instance: Z<any> | null = null;
   current = atom<Zero<TSchema> | null>(null);
 
-  private constructor(z_options: ZeroOptions<TSchema>) {
+  constructor(z_options: ZeroOptions<TSchema>) {
     this.build(z_options);
   }
 
