@@ -14,11 +14,11 @@ export class Z<TSchema extends Schema> {
     this.build(z_options);
   }
 
-  static getInstance<T extends Schema>(z_options?: ZeroOptions<T>): Z<T> {
-    if (!this.instance && z_options) {
-      this.instance = new Z<T>(z_options);
+  static getInstance<TSchema extends Schema>(z_options?: ZeroOptions<TSchema>): Z<TSchema> {
+    if (!this.instance && z_options) {  
+      this.instance = new Z(z_options);
     }
-    return this.instance as Z<T>;
+    return this.instance as Z<TSchema>;
   }
 
   private build(z_options: ZeroOptions<TSchema>) {
