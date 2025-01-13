@@ -8,6 +8,9 @@
       },
       "pnpm": {
         "pkg-path": "pnpm"
+      },
+      "postgresql": {
+        "pkg-path": "postgresql"
       }
     },
     "hook": {},
@@ -265,6 +268,148 @@
       ],
       "outputs": {
         "out": "/nix/store/8hd8pqjprqniahibmn6mrczfhb9b25ij-pnpm-9.15.2"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "postgresql",
+      "broken": false,
+      "derivation": "/nix/store/llid7z4vm8nysgbd61zdj23hvhm2kmmd-postgresql-17.2.drv",
+      "description": "Powerful, open source object-relational database system",
+      "install_id": "postgresql",
+      "license": "PostgreSQL",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=8f3e1f807051e32d8c95cd12b9b421623850a34d",
+      "name": "postgresql-17.2",
+      "pname": "postgresql",
+      "rev": "8f3e1f807051e32d8c95cd12b9b421623850a34d",
+      "rev_count": 733374,
+      "rev_date": "2025-01-04T17:41:09Z",
+      "scrape_date": "2025-01-06T21:17:53Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "17.2",
+      "outputs_to_install": [
+        "out",
+        "man"
+      ],
+      "outputs": {
+        "dev": "/nix/store/982g7jv3065rjvk6plcwcxm1jrxjgdaf-postgresql-17.2-dev",
+        "doc": "/nix/store/ndqa5jqp082mxlbrhgn2wqrcg5x5msa4-postgresql-17.2-doc",
+        "lib": "/nix/store/5i1p7h4fc5j6h854x3jq8dmnwbv3c19f-postgresql-17.2-lib",
+        "man": "/nix/store/w9yv6qlgh7w8ix079v7l3ddy3xd879lj-postgresql-17.2-man",
+        "out": "/nix/store/ljl6i1dmmkp44qb1a1b7g4dr5wnhr2sx-postgresql-17.2"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "postgresql",
+      "broken": false,
+      "derivation": "/nix/store/bblvh0cvbz8953vb57kqrz1krr4wkv94-postgresql-17.2.drv",
+      "description": "Powerful, open source object-relational database system",
+      "install_id": "postgresql",
+      "license": "PostgreSQL",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=8f3e1f807051e32d8c95cd12b9b421623850a34d",
+      "name": "postgresql-17.2",
+      "pname": "postgresql",
+      "rev": "8f3e1f807051e32d8c95cd12b9b421623850a34d",
+      "rev_count": 733374,
+      "rev_date": "2025-01-04T17:41:09Z",
+      "scrape_date": "2025-01-06T21:17:53Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "17.2",
+      "outputs_to_install": [
+        "out",
+        "man"
+      ],
+      "outputs": {
+        "debug": "/nix/store/clrzx5ajr1l8848nz09v7x3vwzfyh3gp-postgresql-17.2-debug",
+        "dev": "/nix/store/k2aqfr1vpgvjjax578ipvaprs026y2d9-postgresql-17.2-dev",
+        "doc": "/nix/store/r76abviddjni83gv3dhrkglwmkkabjxg-postgresql-17.2-doc",
+        "lib": "/nix/store/mj0lg3bd9pszmwzhhnia6l2j39qvfagd-postgresql-17.2-lib",
+        "man": "/nix/store/7mpjw0dlrf0ha315vw4sy760f79sg10m-postgresql-17.2-man",
+        "out": "/nix/store/gprzidv36rfzwb4g8q2w19fsdzr78b83-postgresql-17.2"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "postgresql",
+      "broken": false,
+      "derivation": "/nix/store/1ln0n9jxd9pvs2942gsvag2h7ylwp75v-postgresql-17.2.drv",
+      "description": "Powerful, open source object-relational database system",
+      "install_id": "postgresql",
+      "license": "PostgreSQL",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=8f3e1f807051e32d8c95cd12b9b421623850a34d",
+      "name": "postgresql-17.2",
+      "pname": "postgresql",
+      "rev": "8f3e1f807051e32d8c95cd12b9b421623850a34d",
+      "rev_count": 733374,
+      "rev_date": "2025-01-04T17:41:09Z",
+      "scrape_date": "2025-01-06T21:17:53Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "17.2",
+      "outputs_to_install": [
+        "out",
+        "man"
+      ],
+      "outputs": {
+        "dev": "/nix/store/67mab9i8dkcb76np562ykvk289nxwksv-postgresql-17.2-dev",
+        "doc": "/nix/store/1irjvyczqz98ghg4l7dh6z49ipp8vba7-postgresql-17.2-doc",
+        "lib": "/nix/store/svbkrs1mz2cflpi7yx9kkzjp2i85y76w-postgresql-17.2-lib",
+        "man": "/nix/store/43zb3d9l0775gjhiand9i0p5p2m0mk7r-postgresql-17.2-man",
+        "out": "/nix/store/dxls04s2pf3bi155l5mgwivyj13h6w7p-postgresql-17.2"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "postgresql",
+      "broken": false,
+      "derivation": "/nix/store/ygnab2mrxb53yccndxlxzgdmk2vqd2il-postgresql-17.2.drv",
+      "description": "Powerful, open source object-relational database system",
+      "install_id": "postgresql",
+      "license": "PostgreSQL",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=8f3e1f807051e32d8c95cd12b9b421623850a34d",
+      "name": "postgresql-17.2",
+      "pname": "postgresql",
+      "rev": "8f3e1f807051e32d8c95cd12b9b421623850a34d",
+      "rev_count": 733374,
+      "rev_date": "2025-01-04T17:41:09Z",
+      "scrape_date": "2025-01-06T21:17:53Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "17.2",
+      "outputs_to_install": [
+        "out",
+        "man"
+      ],
+      "outputs": {
+        "debug": "/nix/store/xh5g0mj7i96bza6r9kn33208xdvgn5ah-postgresql-17.2-debug",
+        "dev": "/nix/store/xjdsnglgmz2fc7ggkbysds46z6w07fm6-postgresql-17.2-dev",
+        "doc": "/nix/store/87jwb6bi9jw4csbcdlynb2jsdm7cgmla-postgresql-17.2-doc",
+        "lib": "/nix/store/i2xb3v7r753g1pbrs0x7njvzbqiz4vvf-postgresql-17.2-lib",
+        "man": "/nix/store/dqhdi6x88l1pwi85410y8iyz6i5vg54f-postgresql-17.2-man",
+        "out": "/nix/store/qbvhia9qcd95pvb1zm1cra153lw20l1c-postgresql-17.2"
       },
       "system": "x86_64-linux",
       "group": "toplevel",

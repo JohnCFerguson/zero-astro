@@ -1,87 +1,169 @@
-import type {
-	Query as QueryDef,
-	QueryType,
-	ReadonlyJSONValue,
-	Smash,
-	TableSchema,
-	TypedView
+import { getZeroClient, type Z, type Schema } from './Z.astro';
+import type { 
+  Query as QueryDef,
+  QueryType,
+  Smash,
+  TableSchema,
+  TypedView,
 } from '@rocicorp/zero';
-import { deepClone } from './shared/deep-clone.ts';
-import type { Z } from './Z.astro.ts';
+import type { QueryResultDetails } from '../types/query.ts';
+import type { AdvancedQuery } from '@rocicorp/zero/advanced';
 
-export type ResultType = 'loading' | 'partial' | 'complete' | 'error';
-
-export type QueryResultDetails = {
-	type: ResultType;
-	error?: Error;
-};
-
-export type QueryResult<TReturn extends QueryType> = {
-	data: Smash<TReturn> | undefined;
-	details: QueryResultDetails;
-};
+interface QueryState<T> {
+  data: T | undefined;
+  details: QueryResultDetails;
+}
 
 export class Query<TSchema extends TableSchema, TReturn extends QueryType> {
-	private zero: Z;
-	private query: QueryDef<TSchema, TReturn>;
-	private view: TypedView<Smash<TReturn>> | undefined;
-	private data: Smash<TReturn> | undefined;
-	private details: QueryResultDetails;
-	private listeners: (() => void)[] = [];
+  private queryDef: QueryDef<TSchema, TReturn>;
+  private data: Smash<TReturn> | undefined;
+  private details: QueryResultDetails;
+  private listeners: Set<(state: QueryState<Smash<TReturn>>) => void> = new Set();
+  private view: TypedView<Smash<TReturn>> | undefined;
 
-	constructor(zero: Z, query: QueryDef<TSchema, TReturn>, options?: unknown) {
-		this.zero = zero;
-		this.query = query;
-		this.data = query.format.singular ? undefined : ([] as unknown as Smash<TReturn>);
-		this.details = { type: 'loading' };
-		this.initialize();
-	}
+  constructor(queryDef: QueryDef<TSchema, TReturn>) {
+    this.queryDef = queryDef;
+    this.data = undefined;
+    this.details = { type: 'loading' };
+    this.initialize();
+  }
 
-	private async initialize() {
-		try {
-			const advancedQuery = this.query as unknown as AdvancedQuery<
-				TSchema,
-				TReturn,
-				unknown,
-				unknown
-			>; // Type cast to access advanced properties
-			this.view = await this.zero.query(advancedQuery);
+  private async initialize() {
+    try {
+      const zero = await getZeroClient();
+      this.view = await zero.view(this.queryDef);
+      this.view.onData((data) => this.handleChange(data));
+    } catch (error) {
+      this.details = { type: 'error', error: error as Error };
+      this.notifyListeners();
+    }
+  }
 
-			this.view.addListener((snap, resultType) => {
-				this.data =
-					snap === undefined
-						? undefined
-						: (deepClone(snap as ReadonlyJSONValue) as Smash<TReturn>);
-				this.details = { type: resultType };
-				this.notifyListeners();
-			});
+  private handleChange(data: Smash<TReturn>) {
+    this.data = data;
+    this.details = { type: 'complete' };
+    this.notifyListeners();
+  }
 
-			this.details = { type: this.view.resultType };
-			this.notifyListeners();
-		} catch (error) {
-			this.details = { type: 'error', error: error as Error };
-			this.notifyListeners();
-		}
-	}
+  private notifyListeners() {
+    const state = this.current;
+    this.listeners.forEach(listener => listener(state));
+  }
 
-	public addListener(listener: () => void): void {
-		this.listeners.push(listener);
-	}
+  subscribe(callback: (state: QueryState<Smash<TReturn>>) => void): () => void {
+    this.listeners.add(callback);
+    callback(this.current);
+    return () => {
+      this.listeners.delete(callback);
+      if (this.listeners.size === 0) {
+        this.close();
+      }
+    };
+  }
 
-	public removeListener(listener: () => void): void {
-		this.listeners = this.listeners.filter((l) => l !== listener);
-	}
+  private close() {
+    if (this.view) {
+      this.view.close();
+      this.view = undefined;
+    }
+  }
 
-	private notifyListeners(): void {
-		this.listeners.forEach((listener) => listener());
-	}
-
-	public get current(): QueryResult<TReturn> {
-		return { data: this.data, details: this.details };
-	}
-
-	public destroy(): void {
-		this.view?.destroy();
-		this.view = undefined;
-	}
+  get current(): QueryState<Smash<TReturn>> {
+    return {
+      data: this.data,
+      details: this.details
+    };
+  }
 }
+
+interface TableView<T> {
+  current: T[] | undefined;
+  onData: (callback: (data: T[]) => void) => void;
+  close: () => void;
+}
+
+export class ViewStore {
+  private views: Map<string, ViewWrapper<any, any>> = new Map();
+
+  getView<TSchema extends TableSchema, TReturn extends QueryType>(
+    clientID: string,
+    query: AdvancedQuery<TSchema, TReturn>,
+    enabled: boolean = true
+  ): ViewWrapper<TSchema, TReturn> {
+    if (!enabled) {
+      return new ViewWrapper(
+        query,
+        () => {},
+        () => {}
+      );
+    }
+    const key = JSON.stringify(query);
+    let view = this.views.get(key) as ViewWrapper<TSchema, TReturn>;
+    
+    if (!view) {
+      view = new ViewWrapper(query, () => {}, () => {});
+      this.views.set(key, view);
+    }
+    
+    return view;
+  }
+
+  close() {
+    this.views.forEach(view => view.close());
+    this.views.clear();
+  }
+}
+
+export class ViewWrapper<TSchema extends TableSchema, TReturn extends QueryType> {
+  private view: TypedView<Smash<TReturn>> | undefined;
+  private query: QueryDef<TSchema, TReturn>;
+  private onMaterialized: (view: ViewWrapper<TSchema, TReturn>) => void;
+  private onDematerialized: () => void;
+  private listeners: Set<(data: Smash<TReturn>) => void> = new Set();
+
+  constructor(
+    query: QueryDef<TSchema, TReturn>,
+    onMaterialized: (view: ViewWrapper<TSchema, TReturn>) => void,
+    onDematerialized: () => void
+  ) {
+    this.query = query;
+    this.onMaterialized = onMaterialized;
+    this.onDematerialized = onDematerialized;
+  }
+
+  async subscribe(callback: (data: Smash<TReturn>) => void): Promise<() => void> {
+    if (!this.view) {
+      const zero = await getZeroClient();
+      this.view = await zero.view(this.query);
+      this.view.onData((data) => {
+        this.listeners.forEach(listener => listener(data));
+      });
+    }
+
+    this.listeners.add(callback);
+    return () => {
+      this.listeners.delete(callback);
+      if (this.listeners.size === 0) {
+        this.close();
+      }
+    };
+  }
+
+  close() {
+    if (this.view) {
+      this.view.close();
+      this.view = undefined;
+    }
+  }
+
+  get current(): QueryState<Smash<TReturn>> {
+    return {
+      data: this.view?.current,
+      details: { 
+        type: this.view ? 'complete' : 'loading'
+      }
+    };
+  }
+}
+
+export const viewStore = new ViewStore();

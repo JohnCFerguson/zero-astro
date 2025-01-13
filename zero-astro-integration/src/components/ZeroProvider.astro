@@ -1,0 +1,10 @@
+---
+import { getZeroClient, type ZeroConfig } from '../lib/Z.astro'
+
+interface Props extends ZeroConfig {}
+
+const { url, authToken, schema } = Astro.props
+const client = getZeroClient({ url, authToken, schema })
+---
+
+<slot />

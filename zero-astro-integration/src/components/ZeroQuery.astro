@@ -1,0 +1,79 @@
+---
+import { getZeroClient, type Schema } from '../lib/Z.astro';
+import QueryDef from '../lib/query.astro';
+
+interface Props<T> {
+  query: typeof QueryDef;
+  live?: boolean;
+}
+
+const { query, live = true } = Astro.props as Props<unknown>;
+let data: unknown;
+let error: Error | undefined;
+let isLoading = true;
+
+try {
+  const client = await getZeroClient();
+  data = await client.query(query.queryFn);
+  isLoading = false;
+} catch (e) {
+  error = e instanceof Error ? e : new Error('Unknown error');
+  isLoading = false;
+}
+---
+
+<div id="zero-query" data-query={JSON.stringify(query)} data-live={live}>
+  <slot data={data} error={error} isLoading={isLoading} />
+</div>
+
+{live && (
+  <script>
+    const queryEl = document.getElementById('zero-query');
+    if (!queryEl) return;
+    
+    const queryData = JSON.parse(queryEl?.dataset.query || '{}');
+    
+    async function setupQuery() {
+      let subscription;
+      
+      try {
+        const { getZeroClient } = await import('../lib/Z.astro');
+        const client = await getZeroClient();
+        
+        // Connection state
+        queryEl.dispatchEvent(new CustomEvent('zero:connecting', { detail: true }));
+        
+        subscription = await client.query(queryData.queryFn, {
+          subscribe: true,
+          onData: (newData) => {
+            queryEl.dispatchEvent(new CustomEvent('zero:data', { detail: newData }));
+            queryEl.dispatchEvent(new CustomEvent('zero:loading', { detail: false }));
+          },
+          onError: (error) => {
+            queryEl.dispatchEvent(new CustomEvent('zero:error', { 
+              detail: { message: error?.message || 'Query error', error } 
+            }));
+            queryEl.dispatchEvent(new CustomEvent('zero:loading', { detail: false }));
+          }
+        });
+
+        queryEl.dispatchEvent(new CustomEvent('zero:connected', { detail: true }));
+      } catch (error) {
+        queryEl.dispatchEvent(new CustomEvent('zero:error', { 
+          detail: { message: error?.message || 'Setup error', error } 
+        }));
+      }
+
+      // Cleanup on unmount
+      const cleanup = () => {
+        subscription?.unsubscribe?.();
+        queryEl.dispatchEvent(new CustomEvent('zero:disconnected', { detail: true }));
+      };
+
+      window.addEventListener('beforeunload', cleanup);
+      queryEl.addEventListener('zero:unmount', cleanup);
+    }
+
+    setupQuery();
+  </script>
+)}

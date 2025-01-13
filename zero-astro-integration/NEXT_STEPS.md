@@ -1,74 +1,54 @@
 # Zero Sync Integration Library for Astro: Next Steps
 
-This document outlines the remaining tasks to complete the Zero Sync integration library for Astro.
+## 1. Core Implementation
 
-## 1. Core Functionality
+### Zero Client Integration
+- [x] Create basic Zero client wrapper in ./src/lib/Z.astro.ts
+- [x] Initial schema setup
+- [x] Connection state management
+- [x] Basic error handling
 
-* **Data Fetching (Query):**
-  - Implement a component or function for fetching data using Zero Sync queries.
-  - Consider using `zero-svelte`'s `Query` component as inspiration.
-  - Handle query construction, execution, and result provisioning.
-* **Data Modification (Mutation):**
-  - Create a mechanism for updating, inserting, or deleting data in Zero Sync.
-  - Explore a component similar to `zero-svelte`'s `Mutation` component or dedicated functions.
-* **Real-time Updates (Subscription):**
-  - If real-time updates are required, implement subscriptions to Zero Sync changes.
-  - Notify Astro components of updates.
-* **Authentication:**
-  - If applicable, handle user login, logout, and secure data access based on permissions.
-* **Error Handling and Resilience:**
-  - Implement robust error handling for network issues, validation failures, etc.
-  - Include retry logic, clear error notifications, and recovery mechanisms.
+### Component Structure
+- [x] Create ZeroProvider component
+- [x] Implement ZeroQuery component
+- [ ] Add ZeroMutation component
+- [x] Basic TypeScript types
 
-## Detailed Suggestions and Code Examples
+### Real-time Updates
+- [x] Basic subscription system
+- [x] Initial SSE connection
+- [ ] Client-side state updates
+- [ ] Reconnection handling
 
-### 1. Core Functionality Enhancements
+### Mutations
+- [x] Basic mutation support
+- [ ] Optimistic updates
+- [ ] Error handling
+- [ ] Mutation queueing
 
-* **Data Fetching (Query):**  
-  - Leverage Astro's built-in data fetching capabilities.
-  - Example using a custom `Query` component:
+## 2. Documentation & Examples
 
+### Setup Guide
+- [x] Installation instructions
+- [x] Basic configuration
+- [ ] Quick start example
+- [ ] API reference
 
+### Examples
+- [ ] Basic todo app example
+- [ ] Real-time chat example
+- [ ] Offline-first demo
 
-## 2. Library Structure and Packaging
+## 3. Testing & Quality
+- [x] Basic unit tests
+- [ ] Integration tests
+- [ ] E2E tests
+- [ ] Performance benchmarks
 
-* **Component Organization:**
-  - Organize code into logical components with well-defined responsibilities.
-  - Draw inspiration from `zero-svelte`'s `Query` and `Mutation` components.
-* **Exports and API:**
-  - Define a clear API surface for components, functions, and configuration options.
-* **Package Management:**
-  - Choose a package manager (npm or pnpm) and structure the project accordingly.
-  - Create a `package.json` file with library metadata and dependencies.
-* **Build Process:**
-  - Set up a build process using esbuild or Rollup for a distributable library.
-* **TypeScript Support:**
-  - If using TypeScript, ensure type declarations are generated for type checking.
+## 4. Nice-to-haves
+- [ ] Advanced offline persistence
+- [ ] Authentication helpers
+- [ ] Dev tools integration
+- [ ] Custom error boundaries
 
-## 3. Documentation and Testing
-
-* **User Guide:**
-  - Provide comprehensive documentation with setup, configuration, and usage examples.
-  - Explain components, properties, and integration into Astro projects.
-* **API Reference:**
-  - Document all exported modules, classes, and functions.
-* **Testing:**
-  - Write unit and integration tests to ensure correctness and stability.
-
-## 4. Publishing and Maintenance
-
-* **Repository Setup:**
-  - Create a public repository on GitHub or GitLab to host source code and documentation.
-* **Publishing:**
-  - Publish the package to npm or another package registry for installation.
-* **Maintenance:**
-  - Provide ongoing maintenance and support, address bug reports, and update documentation.
-
-## Detailed Suggestions and Code Examples
-
-### 1. Core Functionality Enhancements
-
-* **Data Fetching (Query):**  
-  - Leverage Astro's built-in data fetching capabilities.
-  - Example using a custom `Query` component:
-
+@workspace based on the @rocicorp/zero/react integration and this zero-svelte integration (https://github.com/stolinski/zero-svelte/tree/main) what do I need to do next to get these working? Please update the files in the /zero-astro-integration/

@@ -31,9 +31,13 @@ export default defineConfig({
       })
     }
   },
+  integrations: [],
   vite: {
     optimizeDeps: {
       include: ['@rocicorp/zero']
+    },
+    ssr: {
+      noExternal: ['@rocicorp/zero']
     }
   }
 });

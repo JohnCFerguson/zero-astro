@@ -17,6 +17,7 @@ version = 1
 [install]
 nodejs = { pkg-path = "nodejs" }
 pnpm.pkg-path = "pnpm"
+postgresql.pkg-path = "postgresql"
 
 
 ## Environment Variables ---------------------------------------------

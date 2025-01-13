@@ -1,5 +1,5 @@
 import { Zero } from '@rocicorp/zero';
-import type { Schema } from '../types.ts';
+import type { Schema } from './Z.astro';
 
 const auth = process.env.ZERO_AUTH_TOKEN || 'default-auth-token';
 

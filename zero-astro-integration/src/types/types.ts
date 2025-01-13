@@ -1,4 +1,5 @@
 import type { QueryType, Smash, TableSchema } from '@rocicorp/zero'
+import type { WriteTransaction } from '@rocicorp/zero';
 
 // JSON Types
 export type JSONValue = 
@@ -25,18 +26,14 @@ export type ReadonlyJSONObject = {
   readonly [key: string]: ReadonlyJSONValue | undefined
 }
 
-// Database Schema Types
-export interface Schema {
-  readonly version: number
-  readonly tables: { readonly [table: string]: TableSchema }
-}
-
 // Todo Types
 export interface Todo {
   id: string
   title: string
   completed: boolean
 }
+
+export type TodoMutation<T> = (tx: WriteTransaction, ...args: any[]) => Promise<T>;
 
 // User Types 
 export interface User {
@@ -61,3 +58,4 @@ export type Immutable<T> = T extends Primitive
   : { readonly [K in keyof T]: Immutable<T[K]> }
 
 export type Expand<T> = T extends infer O ? {[K in keyof O]: O[K]} : never
+

@@ -1,96 +1,145 @@
 # Zero Astro
 
-Zero is the local first platform for building incedible, super fast apps.
+Zero Sync integration for Astro applications. Provides real-time synchronization and offline-first capabilities using [Zero](https://zero.rocicorp.dev/).
 
-To use Zero Astro, you need to follow the Zero docs to get started.
+## Installation
 
-Watch this
-[Zero Sync Makes Local First Easy](https://www.youtube.com/watch?v=hAxdOUgjctk&ab_channel=Syntax)
+```bash
+npm install zero-astro @rocicorp/zero
+```
 
-[<img src="./zero1.png">](https://www.youtube.com/watch?v=hAxdOUgjctk&ab_channel=Syntax)
-
-## Usage
-
-1. Follow [ZERO DOCS](https://zero.rocicorp.dev/docs/introduction) to get started with Zero
-2. Install `npm install zero-astro`
-
-3. Usage
-
-lib/z.svelte.ts (or whatever you'd like to name)
+## Quick Start
 
 ```ts
-// Schema is imported from wherever your Schema type lives.
-// via export type Schema = typeof schema;
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import zero from 'zero-astro';
 
-export const z = new Z()<Schema> {
-		server: PUBLIC_SERVER,
-		schema,
-		userID: 'anon'
-		...
-	};
+export default defineConfig({
+  integrations: [zero()]
+});
 ```
 
-```svelte
-<script lang="ts">
-	import { PUBLIC_SERVER } from '$env/static/public';
-	import { Query } from 'zero-svelte';
-	import { Z } from '$lib/z.svelte';
-	import { schema, type Schema } from '../zero-schema.js';
+```astro
+---
+// src/pages/index.astro
+import { getZeroClient } from 'zero-astro';
+import { ZeroProvider } from 'zero-astro/components';
 
-	const todos = new Query(z.current.query.todo);
+const client = await getZeroClient({
+  url: import.meta.env.PUBLIC_ZERO_URL,
+  authToken: import.meta.env.PUBLIC_ZERO_AUTH_TOKEN
+});
+---
 
-	const randID = () => Math.random().toString(36).slice(2);
-
-	function onsubmit(event: Event) {
-		event.preventDefault();
-		const formData = new FormData(event.target as HTMLFormElement);
-		const newTodo = formData.get('newTodo') as string;
-		const id = randID();
-		if (newTodo) {
-			z.current.mutate.todo.insert({ id, title: newTodo, completed: false });
-			(event.target as HTMLFormElement).reset();
-		}
-	}
-
-	function toggleTodo(event: Event) {
-		const checkbox = event.target as HTMLInputElement;
-		const id = checkbox.value;
-		const completed = checkbox.checked;
-		z.current.mutate.todo.update({ id, completed });
-	}
-</script>
-
-<div>
-	<h1>Todo</h1>
-	<form {onsubmit}>
-		<input type="text" id="newTodo" name="newTodo" />
-		<button type="submit">Add</button>
-	</form>
-	<ul>
-		{#each todos.current as todo}
-			<li>
-				<input
-					type="checkbox"
-					value={todo.id}
-					checked={todo.completed}
-					oninput={toggleTodo}
-				/>{todo.title}
-			</li>
-		{/each}
-	</ul>
-</div>
+<ZeroProvider client={client}>
+  <App />
+</ZeroProvider>
 ```
 
-"todos" here is now reactive and will stay in sync with the persistant db and local data.
+## Features
 
-Mutations & queries are done with just standard Zero.
+- ✅ Server-side data fetching
+- ✅ Client-side hydration
+- ✅ Real-time updates
+- ✅ Type-safe queries and mutations
+- ✅ Automatic error handling
+- ✅ Subscription management
 
-```javascript
-z.current.mutate.todo.update({ id, completed });
+## API Reference
+
+### Z Class
+
+The main Zero client wrapper:
+
+```ts
+import { Z } from 'zero-astro';
+
+const z = new Z({
+  server: 'https://your-zero-server.com',
+  userID: 'user-123',
+  schema: {
+    version: 1,
+    tables: {
+      todos: {
+        version: 1
+      }
+    }
+  }
+});
 ```
 
-See demo for real working code.
+### Queries
 
-See Zero docs for more info.
+```astro
+---
+import { ZeroQuery } from 'zero-astro/components';
 
-Listen to [Syntax](Syntax.fm) for tasty web development treats.
+const query = z.createQuery(tx => tx.get('todos'));
+---
+
+<ZeroQuery {query}>
+  {(data) => (
+    <ul>
+      {data?.map(todo => <li>{todo.title}</li>)}
+    </ul>
+  )}
+</ZeroQuery>
+```
+
+### Mutations
+
+```ts
+const mutation = z.mutate(
+  async (tx, params: { title: string }) => {
+    await tx.put('todos', {
+      id: crypto.randomUUID(),
+      title: params.title
+    });
+  },
+  { title: 'New Todo' }
+);
+```
+
+## Configuration
+
+```ts
+type ZeroConfig = {
+  authToken?: string;
+  url: string;
+};
+
+await getZeroClient({
+  url: 'https://your-zero-server.com',
+  authToken: 'optional-auth-token'
+});
+```
+
+## TypeScript Support
+
+The integration includes full TypeScript support. Define your schema:
+
+```ts
+type Schema = {
+  version: number;
+  tables: {
+    todos: {
+      version: number;
+      // your table schema
+    };
+  };
+};
+
+const z = new Z<Schema>({...});
+```
+
+## Example Usage
+
+Check out the [hello-zero](../hello-zero) directory for a complete example application.
+
+## Environment Variables
+
+```env
+PUBLIC_ZERO_URL="https://your-zero-server.com"
+PUBLIC_ZERO_AUTH_TOKEN="your-auth-token"
+```
