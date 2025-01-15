@@ -1,3 +1,18 @@
+---
+import type { APIContext } from 'astro';
+import { getZeroClient } from '../lib/Z.astro';
+
+export async function load({ locals }: APIContext) {
+  try {
+    const zeroClient = await getZeroClient({ locals } as APIContext);
+    locals.zeroClient = zeroClient;
+  } catch (error) {
+    console.error('Error initializing Zero client:', error);
+    // Handle error appropriately
+  }
+}
+---
+
 <!doctype html>
 <html lang="en">
 	<head>

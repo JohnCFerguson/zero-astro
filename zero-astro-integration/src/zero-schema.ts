@@ -16,21 +16,19 @@ const todoSchema = createTableSchema({
 });
 
 const userSchema = createTableSchema({
-  tableName: 'user',
-  columns: {
-    id: { type: 'number' },
-    name: { type: 'string' },
-    email: { type: 'string' }
-  },
-  primaryKey: ['id']
+	tableName: 'user',
+	columns: {
+		id: { type: 'number' },
+		name: { type: 'string' },
+		email: { type: 'string' }
+	},
+	primaryKey: ['id']
 });
 
 export const schema = createSchema({
-  version: 1,
-  tables: {
-    todo: todoSchema,
-    user: userSchema
-  }
+	version: 1,
+	tables: {
+		todo: todoSchema,
+		user: userSchema
+	}
 });
-
-export type Schema = typeof schema;

@@ -1,11 +1,49 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import Layout from '~/layouts/Layout.astro';
+import { defineAction } from 'astro:actions';
+import { z } from 'astro:schema';
+import type { APIContext } from 'astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+
+
+
+export const server = {
+    runQuery: defineAction({
+        input: z.object({}), // No input needed for this action
+        handler: async (context) => {
+            try {
+                const zeroClient = context.locals.zeroClient;
+                const todosResults = zeroClient.entityQueries.todos.where("completed", "=", true);
+                return { todosResults };
+            } catch (error) {
+                console.error('Error running query:', error);
+                return { error: 'Error running query' };
+            }
+        },
+    }),
+
+    performMutation: defineAction({
+        input: z.object({}), // No input needed for this action
+        handler: async (context) => {
+            try {
+                const zeroClient = context.locals.zeroClient;
+                await zeroClient.mutate['todos'].insert({ id: '1', title: 'New Todo', completed: false });
+                await zeroClient.mutate['todos'].update({ id: '1', completed: true });
+                return { message: 'Mutation successful!' };
+            } catch (error) {
+                console.error('Error performing mutation:', error);
+                return { error: 'Error performing mutation' };
+            }
+        },
+    }),
+};
 ---
-
 <Layout>
-	<Welcome />
+	<form action="/api/runQuery" method="POST">
+		<button type="submit">Run Query</button>
+	</form>
+	
+	<form action="/api/performMutation" method="POST">
+		<button type="submit">Perform Mutation</button>
+	</form>
 </Layout>

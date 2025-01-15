@@ -18,7 +18,7 @@
 
   # Services 
   services.docker = {
-        enable = true;
+    enable = true;
   };
 
   # Sets environment variables in the workspace

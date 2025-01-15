@@ -1,26 +1,15 @@
 ---
-import { Query } from '../lib/query.astro';
-import { mutations } from '../lib/mutations.astro';
-import { z } from '../lib/db';
-
-const todoQuery = new Query(z.query.todo);
-const { data: todos } = todoQuery.current;
+interface Props {
+    data: any;
+    error: Error | undefined;
+    isLoading: boolean
+}
+const {data, error, isLoading} = Astro.props as Props
 ---
-
-<div>
-  <h2>Todos</h2>
-  <ul>
-    {todos.map((todo) => (
-      <li>
-        {todo.title}
-        <button onclick={`window.deleteTodo('${todo.id}')`}>Delete</button>
-      </li>
-    ))}
-  </ul>
-</div>
-
-<script>
-  window.deleteTodo = async (id) => {
-    await mutations.deleteTodo(id);
-  };
-</script>
+{isLoading && <p>Loading...</p>}
+{error && <p>Error: {error.message}</p>}
+{data && (
+    <ul>
+      {data.map((item) => <li>{item.title}</li>)} {/* Example display */}
+    </ul>
+)}
