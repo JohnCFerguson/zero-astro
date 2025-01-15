@@ -14,7 +14,7 @@
     "strict": true,
     "module": "ESNext",
     "moduleDetection": "force",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
       "~/*": ["src/*"]

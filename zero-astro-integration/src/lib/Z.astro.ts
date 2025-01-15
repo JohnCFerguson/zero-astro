@@ -1,7 +1,5 @@
 import { Zero, type Query, type TableSchema, type ZeroOptions } from '@rocicorp/zero';
-import type { APIContext } from 'astro';
 import type { MakeEntityQueriesFromSchema } from 'node_modules/@rocicorp/zero/out/zero-client/src/client/zero.js';
-import type { AdvancedQuery } from '@rocicorp/zero/advanced';
 
 export type Schema = {
 	readonly version: number;
@@ -16,7 +14,6 @@ export type ZeroConfig = {
 };
 
 export async function getZeroClient(
-	context: APIContext,
 	config?: ZeroConfig
 ): Promise<{
 	zeroClient: Zero<Schema>;

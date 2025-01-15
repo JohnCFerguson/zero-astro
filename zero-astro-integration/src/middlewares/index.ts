@@ -1,16 +1,16 @@
 // src/middleware/zeroClient.ts
 import type { APIContext } from 'astro';
+import { getZeroClient } from '../lib/Z.astro';
+import type { ZeroLocals } from '../types/middleware';
 
-export function onRequest(context: APIContext) {
-  // ... initialization of zeroClient ...
-
-  // Check if it is an API call
-  if (context.request.url.startsWith('/api/login')) {
-    // Handle login logic here, setting auth token in context.locals
-    context.locals.authToken = '...';
-    context.response.headers.set('Content-Type', 'application/json');
-    return new Response(JSON.stringify({ status: 'ok' }));
-  } 
-
+export async function createMiddleware(context: APIContext) {
+  // Initialize locals
+  context.locals = context.locals || {};
+  context.locals.authToken = '...';
+  
+  // Initialize Zero client
+  const zeroClient = await getZeroClient();
   context.locals.zeroClient = zeroClient;
 }
+
+export type { ZeroLocals };

@@ -12,11 +12,17 @@ export const ALL = async (context: APIContext) => {
 		});
 	} catch (error) {
 		console.error('Error initializing Zero client:', error);
-		return new Response(JSON.stringify({ success: false, error: error.message }), {
-			status: 500,
-			headers: {
-				'Content-Type': 'application/json'
+		return new Response(
+			JSON.stringify({ 
+				success: false, 
+				error: error instanceof Error ? error.message : 'Unknown error'
+			}), 
+			{ 
+				status: 500,
+				headers: {
+					'Content-Type': 'application/json'
+				}
 			}
-		});
+		);
 	}
 };
