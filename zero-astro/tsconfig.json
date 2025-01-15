@@ -1,7 +1,14 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": ["src/**/*", ".astro/types.d.ts", "**/*", "src/env.d.ts"],
-  "exclude": ["node_modules", "dist"],
+  "include": [
+    "src/**/*",
+    "src/types/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/lib/shared/**/*"
+  ],
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "allowJs": true,
@@ -13,14 +20,19 @@
     "sourceMap": true,
     "strict": true,
     "module": "ESNext",
-    "moduleDetection": "force",
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
       "~/*": ["src/*"]
     },
-    "target": "ESNext",
+    "target": "ES2022",
     "declaration": true,
-    "outDir": "./dist"
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "noEmit": true,
+    "typeRoots": [
+      "./src/types",
+      "./node_modules/@types"
+    ]
   }
 }

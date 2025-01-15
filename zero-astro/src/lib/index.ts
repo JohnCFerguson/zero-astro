@@ -1,3 +1,3 @@
 // Reexport your entry components here
-export * from './Z.astro.ts';
+export * from './ZeroClient.astro.ts';
 export * from './query.astro.ts';

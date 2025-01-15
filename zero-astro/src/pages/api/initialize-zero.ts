@@ -1,5 +1,5 @@
 import type { APIContext } from 'astro';
-import { getZeroClient } from '../../lib/Z.astro.ts';
+import { getZeroClient } from '../../lib/ZeroClient.astro';
 
 export const ALL = async (context: APIContext) => {
 	try {

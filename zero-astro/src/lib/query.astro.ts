@@ -1,84 +1,68 @@
-import type { APIContext } from 'astro';
-import { getZeroClient } from './Z.astro';
 import type { Query as QueryDef, QueryType, Smash, TableSchema, TypedView } from '@rocicorp/zero';
-import type { QueryResultDetails } from '../types/query.ts';
 import type { AdvancedQuery } from '@rocicorp/zero/advanced';
-
-interface QueryState<T> {
-	data: T | undefined;
-	details: QueryResultDetails;
-}
+import type { QueryResultDetails, QueryState } from '~/types/query.js';
 
 export class Query<TSchema extends TableSchema, TReturn extends QueryType> {
 	private queryDef: QueryDef<TSchema, TReturn>;
 	private data: Smash<TReturn> | undefined;
 	private details: QueryResultDetails;
 	private listeners: Set<(state: QueryState<Smash<TReturn>>) => void> = new Set();
-	private view: TypedView<Smash<TReturn>> | undefined;
+	private unsubscribe?: () => void;
 
-	constructor({ locals }: APIContext, queryDef: QueryDef<TSchema, TReturn>) {
+	constructor(queryDef: QueryDef<TSchema, TReturn>) {
 		this.queryDef = queryDef;
 		this.data = undefined;
 		this.details = { type: 'loading' };
-		this.initialize(locals as APIContext);
+		this.initialize();
 	}
 
-	private async initialize({ locals }: APIContext) {
+	private async initialize() {
 		try {
-			const zero = await getZeroClient({ locals } as APIContext);
-			this.view = await zero.view(this.queryDef);
-			this.view.onData((data) => this.handleChange(data));
+			const view = this.queryDef.materialize();
+			this.unsubscribe = () => view.destroy();
+			
+			// Set up data subscription
+			if (view.data) {
+				this.handleChange(view.data);
+			}
 		} catch (error) {
-			this.details = { type: 'error', error: error as Error };
+			this.details = { 
+				type: 'error',
+				errorMessage: error instanceof Error ? error.message : 'Unknown error'
+			};
 			this.notifyListeners();
 		}
 	}
 
 	private handleChange(data: Smash<TReturn>) {
 		this.data = data;
-		this.details = { type: 'complete' };
+		this.details = { type: 'success' };
 		this.notifyListeners();
 	}
 
+	subscribe(callback: (state: QueryState<Smash<TReturn>>) => void) {
+		this.listeners.add(callback);
+		callback({ data: this.data, details: this.details });
+		return () => {
+			this.listeners.delete(callback);
+		};
+	}
+
 	private notifyListeners() {
-		const state = this.current;
+		const state = { data: this.data, details: this.details };
 		this.listeners.forEach((listener) => listener(state));
 	}
 
-	subscribe(callback: (state: QueryState<Smash<TReturn>>) => void): () => void {
-		this.listeners.add(callback);
-		callback(this.current);
-		return () => {
-			this.listeners.delete(callback);
-			if (this.listeners.size === 0) {
-				this.close();
-			}
-		};
-	}
-
-	private close() {
-		if (this.view) {
-			this.view.close();
-			this.view = undefined;
+	dispose() {
+		if (this.unsubscribe) {
+			this.unsubscribe();
 		}
+		this.listeners.clear();
 	}
-
-	get current(): QueryState<Smash<TReturn>> {
-		return {
-			data: this.data,
-			details: this.details
-		};
-	}
-}
-
-interface TableView<T> {
-	current: T[] | undefined;
-	onData: (callback: (data: T[]) => void) => void;
-	close: () => void;
 }
 
 export class ViewStore {
-	private views: Map<string, ViewWrapper<any, any>> = new Map();
+	private views: Map<string, ViewWrapper<TableSchema, QueryType>> = new Map();
 
 	getView<TSchema extends TableSchema, TReturn extends QueryType>(
 		clientID: string,
@@ -131,15 +115,17 @@ export class ViewWrapper<TSchema extends TableSchema, TReturn extends QueryType>
 	}
 
 	async subscribe(
-		{ locals }: APIContext,
 		callback: (data: Smash<TReturn>) => void
 	): Promise<() => void> {
 		if (!this.view) {
-			const zero = await getZeroClient({ locals } as APIContext);
-			this.view = await zero.view(this.query);
-			this.view.onData((data) => {
-				this.listeners.forEach((listener) => listener(data));
-			});
+			const view = this.query.materialize();
+			this.view = view;
+			this.onMaterialized(this);
+
+			// Initial data
+			if (this.view.data) {
+				callback(this.view.data);
+			}
 		}
 
 		this.listeners.add(callback);
@@ -152,20 +138,16 @@ export class ViewWrapper<TSchema extends TableSchema, TReturn extends QueryType>
 	}
 
 	close() {
-		if (this.view) {
-			this.view.close();
-			this.view = undefined;
-		}
+		this.view?.destroy();
 	}
 
 	get current(): QueryState<Smash<TReturn>> {
 		return {
-			data: this.view?.current,
+			data: this.view?.data,
 			details: {
-				type: this.view ? 'complete' : 'loading'
+				type: this.view ? 'success' : 'loading'
 			}
 		};
-	}
-}
+	}}
 
 export const viewStore = new ViewStore();

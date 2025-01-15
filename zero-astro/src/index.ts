@@ -1,6 +1,5 @@
-import type { AstroIntegration } from 'astro';
-import type { MiddlewareRequest, MiddlewareHandler } from './types/middleware';
-import { getZeroClient } from './lib/Z.astro';
+import type { AstroIntegration, MiddlewareHandler} from 'astro';
+import { getZeroClient } from './lib/ZeroClient.astro';
 
 function zeroIntegration(): AstroIntegration {
   return {
@@ -19,16 +18,16 @@ function zeroIntegration(): AstroIntegration {
         });
       },
       'astro:server:setup': async ({ server }) => {
-		const handler: MiddlewareHandler = async (req: Request, _: unknown, next: () => void) => {
-		  const request = req as MiddlewareRequest;
-		  request.locals = request.locals || {};
-		  
-		  if (!request.locals.zeroClient) {
-			request.locals.zeroClient = await getZeroClient();
-		  }
-		  
-		  next();
-		};
+        const handler: MiddlewareHandler = async (context, next) => {
+          if (!context.locals.zeroClient) {
+            context.locals.zeroClient = getZeroClient({
+              url: import.meta.env.PUBLIC_SERVER,
+              schema: context.locals.schema
+            });
+          }
+          
+          return next();
+        };
         
         server.middlewares.use(handler);
       }
@@ -37,4 +36,4 @@ function zeroIntegration(): AstroIntegration {
 }
 
 export default zeroIntegration;
-export type { ZeroLocals } from './types/middleware';
+export * from './lib/ZeroClient.astro';

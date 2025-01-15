@@ -1,16 +1,17 @@
+//  Query Types
 import type { QueryType, Smash } from '@rocicorp/zero';
 
-export interface QueryOptions {
+export interface QueryOptions<T = unknown> {
   /** Enable/disable automatic revalidation */
   revalidate?: boolean;
   /** Custom error handler */
   onError?: (error: Error) => void;
   /** Callback when data is successfully fetched */
-  onSuccess?: (data: any) => void;
+  onSuccess?: (data: T) => void;
   cache?: boolean;
   cacheTime?: number;
   suspense?: boolean;
-  initialState?: QueryState<unknown>;
+  initialState?: QueryState<T>;
   pollInterval?: number;
 }
 
@@ -19,11 +20,12 @@ export type QueryState<T> = {
   details: QueryResultDetails;
 };
 
-export type ResultType = 'unknown' | 'loading' | 'error' | 'complete';
+export type ResultType = 'loading' | 'success' | 'error';
 
-export type QueryResultDetails = {
+export interface QueryResultDetails {
 	type: ResultType;
-};
+	errorMessage?: string;
+}
 
 export type QueryResult<TReturn extends QueryType> = [Smash<TReturn>, QueryResultDetails];
 
@@ -36,3 +38,4 @@ export interface QueryCache<T> {
 export interface QuerySubscriber<T> {
   subscribe: (callback: (state: QueryState<T>) => void) => () => void;
 }
+

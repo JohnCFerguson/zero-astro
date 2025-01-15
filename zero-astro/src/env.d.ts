@@ -1,5 +1,13 @@
 /// <reference types="astro/client" />
-import type { ZeroLocals } from './src/types/middleware';
+declare namespace App {
+  interface Locals {
+    locals: {
+      zeroClient: Promise<{ 
+        zeroClient: ZeroClient<Schema> 
+      }>;
+    };
+  }
+}
 
 interface ImportMetaEnv {
 	readonly PUBLIC_SERVER: string;
@@ -8,10 +16,4 @@ interface ImportMetaEnv {
 
 interface ImportMeta {
 	readonly env: ImportMetaEnv;
-}
-
-declare module 'astro' {
-  interface APIContext {
-    locals: ZeroLocals;
-  }
 }
