@@ -1,3 +1,4 @@
+// astro.config.mjs
 // @ts-check
 import { defineConfig, envField } from 'astro/config';
 
@@ -13,7 +14,7 @@ export default defineConfig({
 			ZERO_REPLICA_FILE: envField.string({ context: 'server', access: 'secret', optional: false })
 		}
 	},
-	integrations: [],
+	integrations: [typescript()],
 	vite: {
 		optimizeDeps: {
 			include: ['@rocicorp/zero']

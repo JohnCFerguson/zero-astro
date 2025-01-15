@@ -1,16 +1,14 @@
 ---
-import type { APIContext } from 'astro';
-import { getZeroClient } from '../lib/Z.astro';
 
-export async function load({ locals }: APIContext) {
-  try {
-    const zeroClient = await getZeroClient({ locals } as APIContext);
-    locals.zeroClient = zeroClient;
-  } catch (error) {
-    console.error('Error initializing Zero client:', error);
-    // Handle error appropriately
-  }
+const { zeroClient } = Astro.locals;
+
+// Use zeroClient here. Example:
+if (zeroClient) {
+    console.log("Zero client initialized successfully:", zeroClient);
+} else {
+    console.error("Zero client not initialized.");
 }
+
 ---
 
 <!doctype html>

@@ -16,13 +16,11 @@ export type ZeroConfig = {
 };
 
 export async function getZeroClient(
-	{ locals }: APIContext,
+	context: APIContext,
 	config?: ZeroConfig
-): Promise<Zero<Schema>> {
-	if (locals?.zeroClient) {
-		return locals.zeroClient;
-	}
-
+): Promise<{
+	zeroClient: Zero<Schema>;
+}> {
 	try {
 		const zeroUrl = config?.url || import.meta.env.PUBLIC_SERVER;
 		const authToken = config?.authToken || import.meta.env.PUBLIC_ZERO_AUTH_TOKEN;
@@ -32,14 +30,15 @@ export async function getZeroClient(
 			throw new ZeroError('Missing ZERO_URL configuration');
 		}
 
-		locals.zeroClient = new Zero<Schema>({
+		const zeroClient = new Zero<Schema>({
 			server: zeroUrl,
 			auth: authToken,
 			userID: userID,
 			schema: config?.schema,
 			logLevel: 'error'
 		});
-		return locals.zeroClient;
+
+		return { zeroClient };
 	} catch (error: unknown) {
 		throw new ZeroError(
 			`Failed to initialize Zero client: ${error instanceof Error ? error.message : 'Unknown error'}`
