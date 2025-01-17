@@ -1,12 +1,8 @@
 /// <reference types="astro/client" />
 declare namespace App {
   interface Locals {
-    locals: {
-      zeroClient: Promise<{ 
-        zeroClient: ZeroClient<Schema> 
-      }>;
-    };
-  }
+    zeroClient: ZeroClient<Schema>
+  };
 }
 
 interface ImportMetaEnv {

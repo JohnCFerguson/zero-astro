@@ -1,8 +1,9 @@
-import type { APIContext, AstroConfig, AstroIntegration } from 'astro';
-import { getZeroClient } from './lib/ZeroClient.astro';
-import { schema } from './zero-schema';
+import { type APIContext, type AstroConfig, type AstroCookies, type AstroIntegration } from 'astro';
+import type { Connect } from 'vite';
+import { setupZeroClient } from './middleware';
 
-function zeroIntegration(): AstroIntegration {
+
+export function createPlugin(): AstroIntegration {
   return {
     name: 'zero-astro',
     hooks: {
@@ -20,33 +21,51 @@ function zeroIntegration(): AstroIntegration {
       },
       
       'astro:server:setup': async ({ server }) => {
-        const zeroClient = await getZeroClient({
-          url: import.meta.env.PUBLIC_SERVER,
-          schema: {
-            version: 1,
-            tables: schema.tables
-          }
-        });
+        server.middlewares.use(async (req, res, next: Connect.NextFunction) => {
+          const request = new Request(`http://${req.headers.host}${req.url}`, {
+            method: req.method,
+            headers: new Headers(req.headers as Record<string, string>),
+          });
 
-        function adaptAstroRequst(req: APIContext): IncomingMessage {
-          const adaptedReq: IncomingMessage = {
-            method: req.request.method,
-            url: req.request.url,
-            headers: req.request.headers,
-            body: req.request.body
+          const context: APIContext = {
+            locals: {} as App.Locals,
+            request,
+            url: new URL(request.url),
+            site: undefined,
+            generator: '',
+            params: {} as Record<string, string | undefined>,
+            props: {} as App.Locals,
+            redirect: (path: string) => new Response(null, {
+              status: 302,
+              headers: { Location: path }
+            }),
+            rewrite: () => Promise.resolve(new Response()),
+            preferredLocale: undefined,
+            preferredLocaleList: undefined,
+            currentLocale: undefined,
+            routePattern: '',
+            clientAddress: req.socket?.remoteAddress ?? '',
+            originPathname: new URL(request.url).pathname,
+            getActionResult: () => undefined,
+            callAction: async () => { throw new Error('Not implemented'); },
+            isPrerendered: false,
+            cookies: {} as AstroCookies
           };
-        }
-    
-
-        server.middlewares.use(async (req: APIContext, _res: any, next: () => void) => {
-          // Inject the client into Astro's global
-          (req.locals as any).zeroClient = zeroClient; 
-          next(); 
+          
+          try {
+            return await setupZeroClient(context, () => {
+              next();
+              return Promise.resolve(new Response());
+            });
+          } catch (e) {
+            next(e);
+            return new Response(null, { status: 500 });
+          }
         });
       }
     }
   };
 }
 
-export default zeroIntegration;
+export default createPlugin;
 export * from './lib/ZeroClient.astro';

@@ -16,7 +16,7 @@
 		"replication"
 	],
 	"scripts": {
-		"build": "tsc && esbuild src/index.ts --bundle --format=esm --outfile=dist/index.js",
+		"build": "tsc && esbuild src/index.ts --bundle --format=esm --platform=node --external:astro --outfile=dist/index.js",
 		"dev": "astro dev",
 		"preview": "astro preview",
 		"astro": "astro",
