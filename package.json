@@ -6,6 +6,9 @@
     "hello-zero"
   ],
   "scripts": {
+    "hello-zero:dev:ui": "turbo run dev:ui --filter=./hello-zero",
+    "hello-zero:dev:db-up": "turbo run dev:db-up --filter=./hello-zero",
+    "hello-zero:dev:zero-cache": "turbo run dev:zero-cache --filter=./hello-zero",
     "dev": "turbo run dev",
     "build": "turbo run build"
   },

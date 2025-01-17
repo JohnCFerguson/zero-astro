@@ -4,9 +4,6 @@ import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
 import type { APIContext } from 'astro';
 
-
-
-
 export const server = {
     runQuery: defineAction({
         input: z.object({}), // No input needed for this action

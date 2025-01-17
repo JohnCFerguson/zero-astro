@@ -1,5 +1,6 @@
-import type { AstroIntegration, MiddlewareHandler} from 'astro';
+import type { APIContext, AstroConfig, AstroIntegration } from 'astro';
 import { getZeroClient } from './lib/ZeroClient.astro';
+import { schema } from './zero-schema';
 
 function zeroIntegration(): AstroIntegration {
   return {
@@ -15,21 +16,33 @@ function zeroIntegration(): AstroIntegration {
               noExternal: ['@rocicorp/zero']
             }
           }
-        });
+        } as AstroConfig);
       },
+      
       'astro:server:setup': async ({ server }) => {
-        const handler: MiddlewareHandler = async (context, next) => {
-          if (!context.locals.zeroClient) {
-            context.locals.zeroClient = getZeroClient({
-              url: import.meta.env.PUBLIC_SERVER,
-              schema: context.locals.schema
-            });
+        const zeroClient = await getZeroClient({
+          url: import.meta.env.PUBLIC_SERVER,
+          schema: {
+            version: 1,
+            tables: schema.tables
           }
-          
-          return next();
-        };
-        
-        server.middlewares.use(handler);
+        });
+
+        function adaptAstroRequst(req: APIContext): IncomingMessage {
+          const adaptedReq: IncomingMessage = {
+            method: req.request.method,
+            url: req.request.url,
+            headers: req.request.headers,
+            body: req.request.body
+          };
+        }
+    
+
+        server.middlewares.use(async (req: APIContext, _res: any, next: () => void) => {
+          // Inject the client into Astro's global
+          (req.locals as any).zeroClient = zeroClient; 
+          next(); 
+        });
       }
     }
   };

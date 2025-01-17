@@ -29,7 +29,6 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "./dist",
-    "noEmit": true,
     "typeRoots": [
       "./src/types",
       "./node_modules/@types"

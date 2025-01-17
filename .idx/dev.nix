@@ -13,6 +13,9 @@
     pkgs.pnpm
     pkgs.gh
     pkgs.docker
+    pkgs.docker-compose
+    pkgs.docker
+    pkgs.postgresql_16
     # pkgs.nodePackages.nodemon
   ];
 
@@ -21,8 +24,17 @@
     enable = true;
   };
 
+  services.postgres = {
+    enable = true;
+  };  
+
   # Sets environment variables in the workspace
-  env = {};
+  env = {
+    HOST_UID = toString (builtins.getEnv "UID");
+    HOST_GID = toString (builtins.getEnv "GID");
+    GID = "1000"; # Or another appropriate GID
+    UID = "1000"; # Or another appropriate UID
+  };
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
@@ -34,16 +46,21 @@
     previews = {
       enable = true;
       previews = {
-        # web = {
-        #   # Example: run "npm run dev" with PORT set to IDX's defined port for previews,
-        #   # and show it in IDX's web preview panel
-        #   command = ["npm" "run" "dev"];
-        #   manager = "web";
-        #   env = {
-        #     # Environment variables to set for your server
-        #     PORT = "$PORT";
-        #   };
-        # };
+        web = {
+          # Example: run "npm run dev" with PORT set to IDX's defined port for previews,
+          # and show it in IDX's web preview panel
+          #command = ["pnpm" "hello-zero:dev:db:ui];
+          manager = "web";
+          env = {
+            # Environment variables to set for your server
+            PORT = "$PORT";
+          };
+        };
+
+        #postgres = {
+          #command = ["sleep" "infinity"];
+          #volumes = ["/tmp/postgres-data:/var/lib/postgresql/data"];
+        #};
       };
     };
 
@@ -58,6 +75,7 @@
       onStart = {
         # Example: start a background task to watch and re-build backend code
         # watch-backend = "npm run watch-backend";
+        start-postgres = "pnpm hello-zero:db-up";
       };
     };
   };
