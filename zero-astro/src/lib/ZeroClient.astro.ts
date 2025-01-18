@@ -1,46 +1,38 @@
-import { Zero, type TableSchema, type ZeroOptions } from '@rocicorp/zero';
+import { Zero, type Schema, type ZeroOptions } from '@rocicorp/zero';
 
+export interface ZeroConfig<S extends Schema> {
+    // Required configurations
+    userID: string;
+    schema: S;
+    server: string;
 
-export type Schema = {
-	readonly version: number;
-	readonly tables: { readonly [table: string]: TableSchema };
-};
+    // Optional configurations
+    auth?: string | ((error?: 'invalid-token') => Promise<string | undefined>);
+    storageKey?: string;
+    logLevel?: 'debug' | 'info' | 'error';
+    kvStore?: 'mem' | 'idb';
+}
 
-export type ZeroConfig = {
-	url: string | URL;
-	schema: Schema;
-	authToken?: string;
-	userID?: string;
-};
+export async function getZeroClient<S extends Schema>(
+    config: ZeroConfig<S>
+): Promise<Zero<S>> {
+    try {
+        const options: ZeroOptions<S> = {
+            server: config.server,
+            userID: config.userID,
+            schema: config.schema,
+            auth: config.auth,
+            storageKey: config.storageKey,
+            logLevel: config.logLevel ?? 'error',
+            kvStore: config.kvStore,
+        };
 
-export async function getZeroClient(
-	config: ZeroConfig
-): Promise<{
-	zeroClient: ZeroClient<Schema>;
-}> {
-	try {
-		const zeroUrl = config.url instanceof URL ? config.url.toString() : config.url || import.meta.env.PUBLIC_SERVER;
-		const authToken = config.authToken || import.meta.env.PUBLIC_ZERO_AUTH_TOKEN;
-		const userID = config.userID || import.meta.env.PUBLIC_ZERO_USER_ID || 'default-user';
-
-		if (!zeroUrl) {
-			throw new ZeroError('Missing ZERO_URL configuration');
-		}
-
-		const zeroClient = new ZeroClient({
-			server: zeroUrl,
-			auth: authToken,
-			userID: userID,
-			schema: config.schema,
-			logLevel: 'error'
-		});
-
-		return { zeroClient };
-	} catch (error: unknown) {
-		throw new ZeroError(
-			`Failed to initialize Zero client: ${error instanceof Error ? error.message : 'Unknown error'}`
-		);
-	}
+        return new Zero(options);
+    } catch (error: unknown) {
+        throw new Error(
+            `Failed to initialize Zero client: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+    }
 }
 
 export class ZeroError extends Error {

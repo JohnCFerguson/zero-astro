@@ -1,9 +1,20 @@
 import { type APIContext, type AstroConfig, type AstroCookies, type AstroIntegration } from 'astro';
 import type { Connect } from 'vite';
-import { setupZeroClient } from './middleware';
+import { createZeroClientMiddleware } from './middleware';
+import type { Schema } from '@rocicorp/zero';
 
+interface ZeroPluginConfig {
+  publicServer: string;
+  upstreamDb: string;
+  cvrDb: string;
+  changeDb: string;
+  authSecret: string;
+  replicaFile: string;
+  schema: Schema;
+  userID?: string;
+}
 
-export function createPlugin(): AstroIntegration {
+export function createPlugin(config: ZeroPluginConfig): AstroIntegration {
   return {
     name: 'zero-astro',
     hooks: {
@@ -21,6 +32,8 @@ export function createPlugin(): AstroIntegration {
       },
       
       'astro:server:setup': async ({ server }) => {
+        const zeroClientMiddleware = createZeroClientMiddleware(config);
+        
         server.middlewares.use(async (req, res, next: Connect.NextFunction) => {
           const request = new Request(`http://${req.headers.host}${req.url}`, {
             method: req.method,
@@ -53,9 +66,9 @@ export function createPlugin(): AstroIntegration {
           };
           
           try {
-            return await setupZeroClient(context, () => {
+            return await zeroClientMiddleware(context, () => {
               next();
-              return Promise.resolve(new Response());
+              return Promise.resolve(new Response('Successfully set up Zero Client'))
             });
           } catch (e) {
             next(e);

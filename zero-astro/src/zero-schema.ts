@@ -15,20 +15,20 @@ const todoSchema = createTableSchema({
 	relationships: {}
 });
 
-const userSchema = createTableSchema({
-	tableName: 'user',
-	columns: {
-		id: { type: 'number' },
-		name: { type: 'string' },
-		email: { type: 'string' }
-	},
-	primaryKey: ['id']
-});
+// const userSchema = createTableSchema({
+// 	tableName: 'user',
+// 	columns: {
+// 		id: { type: 'number' },
+// 		name: { type: 'string' },
+// 		email: { type: 'string' }
+// 	},
+// 	primaryKey: ['id']
+// });
 
 export const schema = createSchema({
 	version: 1,
 	tables: {
 		todo: todoSchema,
-		user: userSchema
+		// user: userSchema
 	}
 });

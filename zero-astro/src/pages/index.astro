@@ -9,7 +9,7 @@ export const server = {
         input: z.object({}), // No input needed for this action
         handler: async (context) => {
             try {
-                const zeroClient = context.locals.zeroClient;
+                const zeroClient = Astro.locals.zeroClient;
                 const todosResults = zeroClient.entityQueries.todos.where("completed", "=", true);
                 return { todosResults };
             } catch (error) {
@@ -23,7 +23,7 @@ export const server = {
         input: z.object({}), // No input needed for this action
         handler: async (context) => {
             try {
-                const zeroClient = context.locals.zeroClient;
+                const zeroClient = Astro.locals.zeroClient;
                 await zeroClient.mutate['todos'].insert({ id: '1', title: 'New Todo', completed: false });
                 await zeroClient.mutate['todos'].update({ id: '1', completed: true });
                 return { message: 'Mutation successful!' };
