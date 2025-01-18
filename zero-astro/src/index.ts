@@ -80,5 +80,6 @@ export function createPlugin(config: ZeroPluginConfig): AstroIntegration {
   };
 }
 
-export default createPlugin;
+// Core exports
 export * from './lib/ZeroClient.astro';
+export * from './lib/query.astro';
