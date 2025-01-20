@@ -37,12 +37,16 @@ export class QueryView<T> implements BaseTypedView<T> {
   addListener(listener: Listener<T>): () => void {
     this.listeners.add(listener);
     
-    if (this.data !== undefined) {
+    if (this.data === undefined) {
+      console.log({data: this.data});
+      listener(this.data as Immutable<T>, "unknown");
+    } else if (this.data === "complete") {
+      console.log({data: this.data});
       listener(this.data as Immutable<T>, "complete");
     }
   
     const viewUnsubscribe = this.baseView.addListener((data) => {
-      listener(data as Immutable<T>, "unknown");
+      listener(data as Immutable<T>, "complete");
     });
 
     return () => {

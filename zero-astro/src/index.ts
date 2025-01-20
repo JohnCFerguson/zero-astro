@@ -35,4 +35,6 @@ export function zeroAstro(config?: ZeroAstroConfig): AstroIntegration {
 
 // Core exports
 export * from './lib/ZeroClient.astro';
+export * from './lib/query.astro';
+export * from './lib/index';
 export default zeroAstro;

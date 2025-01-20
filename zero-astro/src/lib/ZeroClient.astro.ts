@@ -112,7 +112,7 @@ export async function getZeroClient(config: ZeroConfig<Schema>): Promise<ZeroCli
 
     const options: ZeroOptions<Schema> = {
     server: config.publicServer,
-    userID: config.userID ?? 'user',
+    userID: config.userID ?? crypto.randomUUID(),
     schema: config.schema,
     logLevel: config.logLevel ?? 'error',
     kvStore: isServerEnvironment() ? 'mem' : (config.kvStore ?? 'idb'),
