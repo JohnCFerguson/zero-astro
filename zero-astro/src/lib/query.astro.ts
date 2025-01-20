@@ -1,153 +1,115 @@
-import type { Query as QueryDef, QueryType, Smash, TableSchema, TypedView } from '@rocicorp/zero';
-import type { AdvancedQuery } from '@rocicorp/zero/advanced';
-import type { QueryResultDetails, QueryState } from '~/types/query.js';
+import type { 
+  Query as QueryDef,
+  Smash, 
+  TypedView as BaseTypedView, 
+  Schema 
+} from '@rocicorp/zero';
+import type { Immutable } from './shared/immutable';
 
-export class Query<TSchema extends TableSchema, TReturn extends QueryType> {
-	private queryDef: QueryDef<TSchema, TReturn>;
-	private data: Smash<TReturn> | undefined;
-	private details: QueryResultDetails;
-	private listeners: Set<(state: QueryState<Smash<TReturn>>) => void> = new Set();
-	private unsubscribe?: () => void;
-
-	constructor(queryDef: QueryDef<TSchema, TReturn>) {
-		this.queryDef = queryDef;
-		this.data = undefined;
-		this.details = { type: 'loading' };
-		this.initialize();
-	}
-
-	private async initialize() {
-		try {
-			const view = this.queryDef.materialize();
-			this.unsubscribe = () => view.destroy();
-			
-			// Set up data subscription
-			if (view.data) {
-				this.handleChange(view.data);
-			}
-		} catch (error) {
-			this.details = { 
-				type: 'error',
-				errorMessage: error instanceof Error ? error.message : 'Unknown error'
-			};
-			this.notifyListeners();
-		}
-	}
-
-	private handleChange(data: Smash<TReturn>) {
-		this.data = data;
-		this.details = { type: 'success' };
-		this.notifyListeners();
-	}
-
-	subscribe(callback: (state: QueryState<Smash<TReturn>>) => void) {
-		this.listeners.add(callback);
-		callback({ data: this.data, details: this.details });
-		return () => {
-			this.listeners.delete(callback);
-		};
-	}
-
-	private notifyListeners() {
-		const state = { data: this.data, details: this.details };
-		this.listeners.forEach((listener) => listener(state));
-	}
-
-	dispose() {
-		if (this.unsubscribe) {
-			this.unsubscribe();
-		}
-		this.listeners.clear();
-	}
+// Type definitions
+export type ResultType = 'unknown' | 'complete';
+export type Listener<T> = (data: Immutable<T>, resultType: ResultType) => void;
+export type QueryResultDetails = Readonly<{
+    type: ResultType;
+}>;
+export interface QueryState<T> {
+  data: T | undefined;
+  details: { type: ResultType };
 }
 
-export class ViewStore {
-	private views: Map<string, ViewWrapper<TableSchema, QueryType>> = new Map();
+type TableQueryType<T> = {
+  row: T;
+  related: Record<string, never>;
+  singular: false;
+};
 
-	getView<TSchema extends TableSchema, TReturn extends QueryType>(
-		clientID: string,
-		query: AdvancedQuery<TSchema, TReturn>,
-		enabled: boolean = true
-	): ViewWrapper<TSchema, TReturn> {
-		if (!enabled) {
-			return new ViewWrapper(
-				query,
-				() => {},
-				() => {}
-			);
-		}
-		const key = JSON.stringify(query);
-		let view = this.views.get(key) as ViewWrapper<TSchema, TReturn>;
+// QueryView implementation
+class QueryView<T> implements BaseTypedView<T> {
+  private baseView: BaseTypedView<T>;
+  private listeners: Set<Listener<T>> = new Set();
+  data: T;
+  
+  constructor(view: BaseTypedView<T>) {
+    this.baseView = view;
+    this.data = view.data;
+  }
 
-		if (!view) {
-			view = new ViewWrapper(
-				query,
-				() => {},
-				() => {}
-			);
-			this.views.set(key, view);
-		}
+  addListener(listener: Listener<T>): () => void {
+    this.listeners.add(listener);
+    
+    if (this.data !== undefined) {
+      listener(this.data as Immutable<T>, "complete");
+    }
+  
+    const viewUnsubscribe = this.baseView.addListener((data) => {
+      listener(data as Immutable<T>, "unknown");
+    });
 
-		return view;
-	}
+    return () => {
+      this.listeners.delete(listener);
+      viewUnsubscribe();
+    };
+  }
 
-	close() {
-		this.views.forEach((view) => view.close());
-		this.views.clear();
-	}
+  destroy(): void {
+    this.listeners.clear();
+    this.baseView.destroy();
+  }
+
+  subscribe(cb: (data: T) => void): () => void {
+    return this.baseView.addListener((data) => cb(data as T));
+  }
+
+  onChange(cb: (data: T) => void): () => void {
+    return this.baseView.addListener((data) => cb(data as T));
+  }
+  
 }
 
-export class ViewWrapper<TSchema extends TableSchema, TReturn extends QueryType> {
-	private view: TypedView<Smash<TReturn>> | undefined;
-	private query: QueryDef<TSchema, TReturn>;
-	private onMaterialized: (view: ViewWrapper<TSchema, TReturn>) => void;
-	private onDematerialized: () => void;
-	private listeners: Set<(data: Smash<TReturn>) => void> = new Set();
+export class Query<S extends Schema, T extends keyof S['tables']> implements QueryDef<S['tables'][T], TableQueryType<S['tables'][T]>> {
+  #baseQuery: QueryDef<S['tables'][T], TableQueryType<S['tables'][T]>>;
+  #view: BaseTypedView<Smash<TableQueryType<S['tables'][T]>>> | null = null;
+  
+  // Method declarations
+  where!: QueryDef<S['tables'][T], TableQueryType<S['tables'][T]>>['where'];
+  whereExists!: QueryDef<S['tables'][T], TableQueryType<S['tables'][T]>>['whereExists'];
+  start!: QueryDef<S['tables'][T], TableQueryType<S['tables'][T]>>['start'];
+  limit!: QueryDef<S['tables'][T], TableQueryType<S['tables'][T]>>['limit'];
+  orderBy!: QueryDef<S['tables'][T], TableQueryType<S['tables'][T]>>['orderBy'];
+  materialize!: QueryDef<S['tables'][T], TableQueryType<S['tables'][T]>>['materialize'];
+  
+  constructor(queryDef: QueryDef<S['tables'][T], TableQueryType<S['tables'][T]>>) {
+    this.#baseQuery = queryDef;
+    
+    // Bind methods
+    this.where = this.#baseQuery.where.bind(this.#baseQuery);
+    this.whereExists = this.#baseQuery.whereExists.bind(this.#baseQuery);
+    this.start = this.#baseQuery.start.bind(this.#baseQuery);
+    this.limit = this.#baseQuery.limit.bind(this.#baseQuery);
+    this.orderBy = this.#baseQuery.orderBy.bind(this.#baseQuery);
+    this.materialize = this.#baseQuery.materialize.bind(this.#baseQuery);
+  }
 
-	constructor(
-		query: QueryDef<TSchema, TReturn>,
-		onMaterialized: (view: ViewWrapper<TSchema, TReturn>) => void,
-		onDematerialized: () => void
-	) {
-		this.query = query;
-		this.onMaterialized = onMaterialized;
-		this.onDematerialized = onDematerialized;
-	}
+  one() { return this.#baseQuery.one(); }
+  run() { return this.#baseQuery.run(); }
+  preload() { return this.#baseQuery.preload(); }
+  get related() { return this.#baseQuery.related; }
 
-	async subscribe(
-		callback: (data: Smash<TReturn>) => void
-	): Promise<() => void> {
-		if (!this.view) {
-			const view = this.query.materialize();
-			this.view = view;
-			this.onMaterialized(this);
-
-			// Initial data
-			if (this.view.data) {
-				callback(this.view.data);
-			}
-		}
-
-		this.listeners.add(callback);
-		return () => {
-			this.listeners.delete(callback);
-			if (this.listeners.size === 0) {
-				this.close();
-			}
-		};
-	}
-
-	close() {
-		this.view?.destroy();
-	}
-
-	get current(): QueryState<Smash<TReturn>> {
-		return {
-			data: this.view?.data,
-			details: {
-				type: this.view ? 'success' : 'loading'
-			}
-		};
-	}}
-
-export const viewStore = new ViewStore();
+  subscribe(callback: (state: QueryState<Smash<TableQueryType<S['tables'][T]>>>) => void) {
+    if (!this.#view) {
+      const view = this.#baseQuery.materialize();
+      view.addListener((data, resultType) => {
+        callback({
+          data: data as Smash<TableQueryType<S['tables'][T]>>,
+          details: { type: resultType }
+        });
+      });
+      this.#view = view;
+    }
+    
+    return () => {
+      this.#view?.destroy();
+      this.#view = null;
+    };
+  }
+}

@@ -1,41 +1,50 @@
-# Zero Astro Integration
+# Zero-Astro Integration
 
-Astro integration for Rocicorp Zero.
+An Astro integration for Rocicorp Zero, enabling real-time data synchronization.
 
 ## Installation
 
 ```bash
-npm install zero-astro
+pnpm add zero-astro
+```
+
+## Setup
+
+Configure Astro to use zero-astro:
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import zeroAstro from 'zero-astro';
+
+export default defineConfig({
+  integrations: [zeroAstro()],
+  output: 'server'
+});
 ```
 
 ## Usage
 
-```typescript
-// astro.config.mjs
-import zero from 'zero-astro';
+Get a Zero client instance:
+```ts
+import { getZeroClient } from 'zero-astro;
 
-export default defineConfig({
-  integrations: [zero()]
+const zero = await getZeroClient({
+  publicServer: import.meta.env.PUBLIC_SERVER || '',
+  // ...any other config...
 });
+window.__ZERO_CLIENT__ = zero;
 ```
 
-### Middleware
+Use Zero calls in your components:
+```ts
+zero.subscribe('table', (data) => {
+  // handle updates
+});
 
-The integration adds a Zero client to your Astro context:
-
-```typescript
-import type { APIContext } from 'astro';
-
-export async function GET({ locals }: APIContext) {
-  const { zeroClient } = locals;
-  // Use zeroClient here
-}
+// Mutate data:
+await zero.mutate.table.insert({ ... });
 ```
 
-## Configuration
+## Additional Resources
 
-No configuration required. The middleware automatically initializes the Zero client.
-
-## Types
-
-The package includes TypeScript definitions. The `ZeroLocals` interface is automatically added to your Astro's `Locals`.
+See the examples for a complete reference on integrating Zero with Astro.
