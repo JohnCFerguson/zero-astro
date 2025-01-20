@@ -1,13 +1,8 @@
-import { Zero, type Schema, type ZeroOptions, type TableSchema, type QueryType } from '@rocicorp/zero';
-import { Query } from './query';
+import { Zero, type Schema, type ZeroOptions } from '@rocicorp/zero';
+import { Query, type QueryState } from './query.astro';
+import type { Expand } from './shared/expand';
 
-type DataCallback<T> = (data: T) => void;
-
-type DefaultQueryResultRow<T extends TableSchema> = {
-  row: T;
-  related: Record<string, never>;
-  singular: false;
-};
+export type DataCallback<T> = (data: T) => void;
 
 export type MakeEntityQueriesFromSchema<S extends Schema> = {
     readonly [K in keyof S['tables']]: Query<S, K>;
@@ -27,52 +22,48 @@ export interface ZeroConfig<S extends Schema> {
 }
 
 export class ZeroError extends Error {
-  constructor(message: string, public code?: string) {
+    constructor(message: string, public code?: string) {
     super(message);
     this.name = 'ZeroError';
   }
 }
 
-const isServerEnvironment = () => typeof window === 'undefined';
+export const isServerEnvironment = () => typeof window === 'undefined';
 
-declare global {
-  interface Window {
-    __ZERO_CLIENT__?: ZeroClient<Schema>;
-  }
-}
 
-export class ZeroClient<S extends Schema> extends Zero<S> {
+export class ZeroClient<S extends Schema> extends Zero<Schema> {
   private observers: Map<string, Set<DataCallback<unknown>>> = new Map();
-  private targetNode: EventTarget;
-  readonly query: MakeEntityQueriesFromSchema<S>;
+  private targetNode: EventTarget;  
+  readonly #query: MakeEntityQueriesFromSchema<S>;
 
-  constructor(config: ZeroOptions<S>) {
+    constructor(config: ZeroOptions<Schema>) {
     super(config);
+    const queryObj = Object.entries(this.query).reduce((acc, [key, value]) => {
+      const newAcc = {} as Record<keyof S['tables'], Query<S, keyof S['tables']>>;
+      newAcc[key as keyof S['tables']] = new Query<S, keyof S['tables']>(value as Query<S, keyof S['tables']>);
+      return newAcc;
+    }, {} as MakeEntityQueriesFromSchema<S>); // Correct type here
+    // Cast this new object.
+    this.#query = queryObj;
     this.targetNode = new EventTarget();
-    this.query = Object.entries(super.query).reduce((acc, [key, value]) => {
-      acc[key as keyof S['tables']] = new Query(value);
-      return acc;
-    }, {} as MakeEntityQueriesFromSchema<S>);
   }
-
   private setupSubscription(table: keyof S["tables"]) {
     if (this.observers.has(table as string)) {
-      return;
+        return;
     }
-
-    this.query[table].subscribe((state: QueryState) => {
+    this.#query[table].subscribe((state: QueryState<readonly Expand<S["tables"][keyof S["tables"]] & { readonly [x: string]: undefined; }>[]>) => {
       if (state.details.type === 'complete' && state.data) {
         const observers = this.observers.get(table as string);
         if (observers) {
           observers.forEach(callback => {
             try {
-              callback(state.data);
+          callback(state.data);          
             } catch (error) {
               console.error(`Error in observer callback for table ${String(table)}:`, error);
             }
           });
         }
-
+        
         const event = new CustomEvent('dataChange', {
           detail: { table, data: state.data }
         });
@@ -81,7 +72,7 @@ export class ZeroClient<S extends Schema> extends Zero<S> {
     });
   }
 
-  public subscribe<T extends keyof S['tables']>(
+    public subscribe<T extends keyof S['tables']>(
     table: T,
     callback: DataCallback<S['tables'][T][]>
   ): () => void {
@@ -89,7 +80,7 @@ export class ZeroClient<S extends Schema> extends Zero<S> {
       this.observers.set(table as string, new Set());
       this.setupSubscription(table);
     }
-    
+
     const observers = this.observers.get(table as string)!;
     observers.add(callback as DataCallback<unknown>);
     
@@ -100,26 +91,26 @@ export class ZeroClient<S extends Schema> extends Zero<S> {
       }
     };
   }
-
+    
   public destroy(): void {
     this.observers.clear();
     if (!isServerEnvironment()) {
       window.__ZERO_CLIENT__ = undefined;
     }
-    super.destroy?.();
+    this.destroy?.();
   }
 }
 
-export async function getZeroClient<S extends Schema>(config: ZeroConfig<S>): Promise<ZeroClient<S>> {
+export async function getZeroClient(config: ZeroConfig<Schema>): Promise<ZeroClient<Schema>> {
   if (!isServerEnvironment() && window.__ZERO_CLIENT__) {
     const client = window.__ZERO_CLIENT__;
     if (!(client instanceof ZeroClient)) {
       throw new ZeroError('Invalid client instance found in window.__ZERO_CLIENT__');
     }
-    return client as ZeroClient<S>;
+    return client;
   }
 
-  const options: ZeroOptions<S> = {
+    const options: ZeroOptions<Schema> = {
     server: config.publicServer,
     userID: config.userID ?? 'user',
     schema: config.schema,
@@ -127,9 +118,14 @@ export async function getZeroClient<S extends Schema>(config: ZeroConfig<S>): Pr
     kvStore: isServerEnvironment() ? 'mem' : (config.kvStore ?? 'idb'),
   };
 
-  const client = new ZeroClient<S>(options);
+  const client = new ZeroClient<Schema>(options);
   if (!isServerEnvironment()) {
     window.__ZERO_CLIENT__ = client;
   }
-  return client;
+    return client;
+}
+declare global {
+  interface Window {
+    __ZERO_CLIENT__?: ZeroClient<Schema>;
+  }
 }

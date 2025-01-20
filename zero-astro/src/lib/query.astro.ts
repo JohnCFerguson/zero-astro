@@ -17,14 +17,14 @@ export interface QueryState<T> {
   details: { type: ResultType };
 }
 
-type TableQueryType<T> = {
+export type TableQueryType<T> = {
   row: T;
   related: Record<string, never>;
   singular: false;
 };
 
 // QueryView implementation
-class QueryView<T> implements BaseTypedView<T> {
+export class QueryView<T> implements BaseTypedView<T> {
   private baseView: BaseTypedView<T>;
   private listeners: Set<Listener<T>> = new Set();
   data: T;

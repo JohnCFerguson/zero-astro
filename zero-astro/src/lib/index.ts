@@ -1,6 +1,7 @@
 // Reexport your entry components here
-export * from './ZeroClient.astro.ts';
-export * from './query.astro.ts';
-export { Query } from './query.astro';
-export { viewStore } from './query.astro';
-export { getZeroClient } from './ZeroClient.astro';
+export * from './ZeroClient.astro';
+export * from './query.astro';
+export { Query, QueryView } from './query.astro'
+export type { QueryResultDetails, QueryState, TableQueryType, Listener, ResultType } from './query.astro';
+export { getZeroClient, isServerEnvironment, ZeroClient, ZeroError } from './ZeroClient.astro';
+export type { DataCallback, ZeroConfig, MakeEntityQueriesFromSchema } from './ZeroClient.astro'

@@ -1,18 +1,12 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [
-    "src/**/*",
-    "src/types/**/*.d.ts"
+    "src/lib"
   ],
   "exclude": [
-    "node_modules",
-    "dist",
-    "src/lib/shared/**/*"
+    "src/lib/shared"
   ],
   "compilerOptions": {
-    "allowImportingTsExtensions": true,
-    "allowJs": true,
-    "checkJs": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
@@ -27,11 +21,10 @@
     },
     "target": "ES2022",
     "declaration": true,
-    "emitDeclarationOnly": true,
     "outDir": "./dist",
     "typeRoots": [
       "./src/types",
       "./node_modules/@types"
-    ]
+    ],
   }
 }
