@@ -1,11 +1,15 @@
-# Zero-Astro Integration
+# Zero Astro
 
-An Astro integration for Rocicorp Zero, enabling real-time data synchronization.
+Zero integration for Astro applications.
 
 ## Installation
 
 ```bash
-pnpm add zero-astro
+npm install zero-astro
+
+yarn add zero-astro
+
+pnpm astro add zero-astro
 ```
 
 ## Setup

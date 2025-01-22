@@ -37,4 +37,6 @@ export function zeroAstro(config?: ZeroAstroConfig): AstroIntegration {
 export * from './lib/ZeroClient.astro';
 export * from './lib/query.astro';
 export * from './lib/index';
+export * from './lib/shared/expand';
+export type { Row } from '@rocicorp/zero';
 export default zeroAstro;

@@ -19,7 +19,7 @@
     "paths": {
       "~/*": ["src/*"]
     },
-    "target": "ES2022",
+    "target": "ESNext",
     "declaration": true,
     "outDir": "./dist",
     "typeRoots": [

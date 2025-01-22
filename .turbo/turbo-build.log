@@ -1,0 +1,58 @@
+
+
+> zero-astro@0.0.1 build /Users/johnferguson/Github/zero-astro/zero-astro
+> tsc && esbuild src/index.ts --bundle --format=esm --outfile=dist/index.js
+
+[96msrc/index.ts[0m:[93m22[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'zeroClient' does not exist on type 'Locals'.
+
+[7m22[0m           if (!context.locals.zeroClient) {
+[7m  [0m [91m                              ~~~~~~~~~~[0m
+
+[96msrc/index.ts[0m:[93m23[0m:[93m28[0m - [91merror[0m[90m TS2339: [0mProperty 'zeroClient' does not exist on type 'Locals'.
+
+[7m23[0m             context.locals.zeroClient = getZeroClient({
+[7m  [0m [91m                           ~~~~~~~~~~[0m
+
+[96msrc/index.ts[0m:[93m25[0m:[93m38[0m - [91merror[0m[90m TS2339: [0mProperty 'schema' does not exist on type 'Locals'.
+
+[7m25[0m               schema: context.locals.schema
+[7m  [0m [91m                                     ~~~~~~[0m
+
+[96msrc/index.ts[0m:[93m32[0m:[93m32[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 4, '(fn: NextHandleFunction): Server', gave the following error.
+    Argument of type 'MiddlewareHandler' is not assignable to parameter of type 'NextHandleFunction'.
+      Types of parameters 'context' and 'req' are incompatible.
+        Type 'IncomingMessage' is missing the following properties from type 'APIContext<Record<string, any>, Record<string, string | undefined>>': site, generator, params, props, and 14 more.
+  Overload 2 of 4, '(fn: HandleFunction): Server', gave the following error.
+    Argument of type 'MiddlewareHandler' is not assignable to parameter of type 'HandleFunction'.
+      Type 'MiddlewareHandler' is not assignable to type 'NextHandleFunction'.
+        Types of parameters 'context' and 'req' are incompatible.
+          Type 'IncomingMessage' is missing the following properties from type 'APIContext<Record<string, any>, Record<string, string | undefined>>': site, generator, params, props, and 14 more.
+
+[7m32[0m         server.middlewares.use(handler);
+[7m  [0m [91m                               ~~~~~~~[0m
+
+
+[96msrc/pages/api/initialize-zero.ts[0m:[93m6[0m:[93m46[0m - [91merror[0m[90m TS2345: [0mArgument of type 'APIContext<Record<string, any>, Record<string, string | undefined>>' is not assignable to parameter of type 'ZeroConfig'.
+  Property 'schema' is missing in type 'APIContext<Record<string, any>, Record<string, string | undefined>>' but required in type 'ZeroConfig'.
+
+[7m6[0m   const { zeroClient } = await getZeroClient(context);
+[7m [0m [91m                                             ~~~~~~~[0m
+
+  [96msrc/lib/ZeroClient.astro.ts[0m:[93m11[0m:[93m2[0m
+    [7m11[0m  schema: Schema;
+    [7m  [0m [96m ~~~~~~[0m
+    'schema' is declared here.
+
+[96msrc/pages/api/initialize-zero.ts[0m:[93m7[0m:[93m41[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'zeroClient' does not exist in type 'Locals'.
+
+[7m7[0m   context.locals = { ...context.locals, zeroClient };
+[7m [0m [91m                                        ~~~~~~~~~~[0m
+
+
+Found 6 errors in 2 files.
+
+Errors  Files
+     4  src/index.ts[90m:22[0m
+     2  src/pages/api/initialize-zero.ts[90m:6[0m
+[41m[30m ELIFECYCLE [39m[49m [31mCommand failed with exit code 2.[39m

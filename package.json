@@ -1,20 +1,63 @@
 {
-  "name": "zero-astro-root",
-  "private": true,
-  "workspaces": [
-    "zero-astro",
-    "hello-zero"
-  ],
-  "scripts": {
-    "hello-zero:dev:ui": "turbo run dev:ui --filter=./hello-zero",
-    "hello-zero:dev:db-up": "turbo run dev:db-up --filter=./hello-zero",
-    "hello-zero:dev:zero-cache": "turbo run dev:zero-cache --filter=./hello-zero",
-    "dev": "turbo run dev",
-    "build": "turbo run build"
-  },
-  "devDependencies": {
-    "turbo": "^2.3.3"
-  },
-  "version": "0.0.1",
-  "packageManager": "pnpm@9.15.2"
+	"name": "zero-astro",
+	"type": "module",
+	"version": "0.0.1",
+	"description": "Zero integration for Astro",
+	"author": "Your Name",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/username/zero-astro.git"
+	},
+	"keywords": [
+		"astro",
+		"integration",
+		"zero"
+	],
+	"scripts": {
+		"build": "rm -rf dist && tsc && node esbuild.config.mjs",
+		"types": "tsc --emitDeclarationOnly --outDir dist",
+		"dev": "astro dev",
+		"preview": "astro preview",
+		"astro": "astro",
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf dist",
+		"prepublishOnly": "pnpm build"
+	},
+	"dependencies": {
+		"@rocicorp/zero": "^0.11.2025011402",
+		"astro": "^5.1.7"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.18.0",
+		"@types/eslint-config-prettier": "^6.11.3",
+		"@typescript-eslint/eslint-plugin": "^8.20.0",
+		"@typescript-eslint/parser": "^8.20.0",
+		"esbuild": "^0.24.2",
+		"esbuild-plugin-d.ts": "^1.3.1",
+		"eslint": "^9.18.0",
+		"eslint-config-prettier": "^10.0.1",
+		"eslint-plugin-astro": "^1.3.1",
+		"globals": "^15.14.0",
+		"typescript": "^5.7.3",
+		"typescript-eslint": "^8.20.0",
+		"vite": "^6.0.7",
+		"vitest": "^2.1.8"
+	},
+	"peerDependencies": {
+			"astro": "^5.1.7",
+			"@rocicorp/zero": "^0.11.2025011402"
+	},
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"main": "./dist/index.js",
+	"module": "dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist"
+	]
 }

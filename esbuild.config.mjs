@@ -6,8 +6,11 @@ await esbuild.build({
   bundle: true,
   format: 'esm',
   outfile: 'dist/index.js',
-  external: ['astro', '@rocicorp/zero'],
-  platform: 'node',
-  target: 'node16',
+  external: [
+    'astro',
+    '@rocicorp/zero'
+  ],
+  platform: 'neutral',
+  target: 'ESNext',
   sourcemap: true
 });
