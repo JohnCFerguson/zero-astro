@@ -5,11 +5,17 @@ Zero integration for Astro applications.
 ## Installation
 
 ```bash
+# Using npm
 npm install zero-astro
 
+# Using yarn
 yarn add zero-astro
 
-pnpm astro add zero-astro
+# Using pnpm
+pnpm add zero-astro
+
+# Using astro cli
+npx astro add zero-astro
 ```
 
 ## Setup
@@ -21,7 +27,9 @@ import { defineConfig } from 'astro/config';
 import zeroAstro from 'zero-astro';
 
 export default defineConfig({
-  integrations: [zeroAstro()],
+  integrations: [zeroAstro({
+    projectId: 'your-project-id'
+  })],
   output: 'server'
 });
 ```
@@ -30,23 +38,37 @@ export default defineConfig({
 
 Get a Zero client instance:
 ```ts
-import { getZeroClient } from 'zero-astro;
+import { getZeroClient, QueryView } from 'zero-astro';
 
 const zero = await getZeroClient({
   publicServer: import.meta.env.PUBLIC_SERVER || '',
   // ...any other config...
 });
 window.__ZERO_CLIENT__ = zero;
-```
 
-Use Zero calls in your components:
-```ts
-zero.subscribe('table', (data) => {
-  // handle updates
+// Create a materialized query view
+const view = zero.query.table.materialize();
+const queryView = new QueryView(view);
+
+// Subscribe to updates
+const unsubscribe = queryView.addListener((data, resultType) => {
+  if (resultType === 'complete') {
+    // handle updates
+    console.log('Data updated:', data);
+  }
 });
 
-// Mutate data:
-await zero.mutate.table.insert({ ... });
+// Cleanup on unmount
+window.addEventListener('unload', () => {
+  unsubscribe();
+  queryView.destroy();
+});
+
+// Mutate data with type safety:
+await zero.mutate.table.insert({
+  id: crypto.randomUUID(),
+  // ...your data
+});
 ```
 
 ## Additional Resources
