@@ -1,7 +1,7 @@
 {
 	"name": "zero-astro",
 	"type": "module",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "Zero integration for Astro",
 	"author": "Your Name",
 	"license": "MIT",
